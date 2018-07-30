@@ -1,12 +1,14 @@
-apply plugin: 'java'
-apply plugin: 'org.springframework.boot'
+buildscript {
+  repositories { mavenCentral() }
+}
+
 plugins {
     id "info.solidsoft.pitest" version '1.3.0'
 }
 
-buildscript {
-  repositories { mavenCentral() }
-}
+apply plugin: 'java'
+apply plugin: 'org.springframework.boot'
+
 
 def springBootVersion = '2.0.1.RELEASE'
 
@@ -58,5 +60,5 @@ pitest {
     threads = 5
     outputFormats = ['XML', 'HTML']
     timestampedReports = true
-    mutationThreshold = 10
+    mutationThreshold = 75
 }
