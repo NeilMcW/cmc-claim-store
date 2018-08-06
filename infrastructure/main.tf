@@ -176,6 +176,7 @@ module "claim-store-api" {
     // feature toggles
     CLAIM_STORE_TEST_SUPPORT_ENABLED = "${var.env == "prod" ? "false" : "true"}"
     FEATURE_TOGGLES_EMAILTOSTAFF = "${var.enable_staff_email}"
+    FEATURE_RETURN_ERROR_TO_USER = "${var.env == "prod" ? "false" : "true"}"
 
     ROOT_APPENDER = "CMC"
   }
