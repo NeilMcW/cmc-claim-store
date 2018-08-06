@@ -38,10 +38,12 @@ public class ResourceExceptionHandler {
     private static final CharSequence UNIQUE_CONSTRAINT_MESSAGE = "duplicate key value violates unique constraint";
     private static final String INTERNAL_SERVER_ERROR = "Internal server error";
 
+    private static final boolean RETURN_ERROR_TO_USER = Boolean.valueOf(System.getenv("FEATURE_RETURN_ERROR_TO_USER"));
+
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<Object> internalServiceError(Exception exception) {
         logger.error(exception.getMessage(), exception);
-        return new ResponseEntity<>(INTERNAL_SERVER_ERROR, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(getMessage(exception.getMessage()), new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(value = UnableToExecuteStatementException.class)
@@ -59,7 +61,7 @@ public class ResourceExceptionHandler {
             return new ResponseEntity<>(message.get(), HttpStatus.CONFLICT);
         }
 
-        return new ResponseEntity<>(INTERNAL_SERVER_ERROR, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(getMessage(exception.getMessage()), new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(value = HttpClientErrorException.class)
@@ -170,9 +172,14 @@ public class ResourceExceptionHandler {
     protected ResponseEntity<Object> handleFeignException(FeignException exc) {
         logger.warn("Error communicating with an API", exc);
         String errorMessage = exc.status() < HttpStatus.INTERNAL_SERVER_ERROR.value() ? exc
-            .getMessage() : INTERNAL_SERVER_ERROR;
+            .getMessage() : getMessage(exc.getMessage());
         return ResponseEntity
             .status(exc.status())
             .body(new ExceptionForClient(exc.status(), errorMessage));
     }
+
+    private String getMessage(String message) {
+        return RETURN_ERROR_TO_USER ? message : INTERNAL_SERVER_ERROR;
+    }
+
 }
